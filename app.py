@@ -3,10 +3,11 @@ import streamlit as st
 # -------------------------------------------------
 # PAGE CONFIG
 # -------------------------------------------------
+import streamlit as st
 
 st.set_page_config(
     page_title="Medical Report Analyzer",
-    page_icon="🩺",
+    page_icon="assets/logo.png",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -127,12 +128,10 @@ padding:30px;
 
 with st.sidebar:
 
-    st.image("https://img.icons8.com/color/96/stethoscope.png", width=70)
+    st.image("assets/logo.png", width=120)
 
     st.title("Medical Report Analyzer")
-
     st.caption("AI Powered Healthcare")
-
     st.divider()
 
     st.success("🟢 System Ready")
