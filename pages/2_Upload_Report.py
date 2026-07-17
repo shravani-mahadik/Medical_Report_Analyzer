@@ -2,12 +2,15 @@ import streamlit as st
 from PIL import Image
 import pandas as pd
 import os
+import json
 
 from utils.image_reader import read_image
 from utils.pdf_reader import read_pdf
 from utils.analyzer import extract_parameters
 from utils.health_checker import check_health
 from utils.summary import generate_health_summary
+from datetime import datetime
+from utils.pdf_generator import generate_pdf
 
 # ---------------------------------------------------
 # PAGE CONFIG
@@ -103,10 +106,23 @@ if uploaded_file is not None:
         st.image(
             image,
             caption="Uploaded Medical Report",
-            use_container_width=True
+            width="stretch"
         )
 
         extracted_text = read_image(save_path)
+
+        if extracted_text is None:
+            st.error("❌ Unable to process the image.")
+            st.info(
+            """
+        Possible reasons:
+
+        • Corrupted image
+        • Blurry image
+        • Unsupported format
+        """)
+            
+            st.stop()
 
     else:
 
@@ -114,9 +130,29 @@ if uploaded_file is not None:
 
         extracted_text = read_pdf(save_path)
 
-    # ------------------------------------------------
-    # OCR TEXT (Developer Mode)
-    # ------------------------------------------------
+        if extracted_text is None:
+            st.error("❌ Unable to read the PDF.")
+            st.info(
+            """
+        Possible reasons:
+
+        • Corrupted PDF
+        • Password-protected PDF
+        • Scanned PDF without readable text
+        • Unsupported PDF format
+        """)
+            st.stop()
+
+# ------------------------------------------------
+# CHECK EMPTY OCR OUTPUT
+# ------------------------------------------------
+
+    if not extracted_text.strip():
+
+        st.warning("⚠️ No readable text found in the uploaded report.")
+        st.stop()
+
+# OCR TEXT
 
     with st.expander("📄 View OCR Text (Developer Mode)"):
 
@@ -125,12 +161,23 @@ if uploaded_file is not None:
             extracted_text,
             height=250
         )
-
+    
     # ------------------------------------------------
     # PARAMETER EXTRACTION
     # ------------------------------------------------
 
     parameters = extract_parameters(extracted_text)
+    # ------------------------------------------------
+# CHECK PARAMETER EXTRACTION
+# ------------------------------------------------
+
+    if len(parameters) == 0:
+ 
+       st.error("❌ No medical parameters were detected.")
+
+       st.info("Please upload a clearer medical report.")
+
+       st.stop()
 
     # ------------------------------------------------
     # HEALTH CHECK
@@ -139,6 +186,40 @@ if uploaded_file is not None:
     health_results = check_health(parameters)
 
     summary = generate_health_summary(health_results)
+
+    report_data = {
+        "parameters": parameters,
+        "health_results": health_results,
+        "summary": summary
+    }
+
+    REPORT_FOLDER = "reports"
+    os.makedirs(REPORT_FOLDER, exist_ok=True)
+
+    patient = summary["Patient Name"]
+
+    if patient == "Unknown":
+       patient = "Patient"
+
+    patient = patient.replace(" ", "_")
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    filename = f"{patient}_{timestamp}.json"
+
+    report_path = os.path.join(REPORT_FOLDER, filename)
+
+    with open(report_path, "w") as file:
+        json.dump(report_data, file, indent=4)
+
+# Keep latest report for Analytics
+    latest_path = os.path.join(REPORT_FOLDER, "latest_report.json")
+
+    with open(latest_path, "w") as file:
+        json.dump(report_data, file, indent=4)
+    
+    st.success(f"✅ Report saved successfully as: {filename}")
+    
 
     # ------------------------------------------------
     # MEDICAL ANALYSIS TABLE
@@ -166,7 +247,7 @@ if uploaded_file is not None:
 
     st.dataframe(
         df,
-        use_container_width=True,
+        width="stretch",
         hide_index=True
     )
 
@@ -246,7 +327,48 @@ if uploaded_file is not None:
 
     for recommendation in summary["Recommendations"]:
         st.info(recommendation)
+    
+
+
+    # ----------------------------------------
+    # GENERATE PDF REPORT
+    # ----------------------------------------
+
+    PDF_FOLDER = "pdf_reports"
+    os.makedirs(PDF_FOLDER, exist_ok=True)
+
+    pdf_path = os.path.join(
+        PDF_FOLDER,
+        filename.replace(".json", ".pdf")
+    )
+
+    try:
+
+        generate_pdf(
+            summary,
+            health_results,
+            pdf_path
+        )
+
+    except Exception as e:
+
+        st.error(f"❌ PDF generation failed.\n\n{e}")
+        st.stop()
+
+    
+    with open(pdf_path, "rb") as pdf_file:
+
+        st.download_button(
+            label="📄 Download PDF Report",
+            data=pdf_file,
+            file_name=os.path.basename(pdf_path),
+            mime="application/pdf"
+        )
 
 else:
-
     st.info("⬆️ Please upload a PDF, JPG, JPEG or PNG medical report.")
+
+
+
+
+

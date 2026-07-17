@@ -51,26 +51,6 @@ st.write("Welcome back! Here's an overview of your Medical Report Analyzer.")
 st.divider()
 
 # ---------------------------------------
-# Statistics
-# ---------------------------------------
-
-c1, c2, c3, c4 = st.columns(4)
-
-with c1:
-    st.metric("📂 Reports Uploaded", "0")
-
-with c2:
-    st.metric("🧪 Parameters Found", "0")
-
-with c3:
-    st.metric("⚠ Abnormal Values", "0")
-
-with c4:
-    st.metric("💚 Health Score", "--")
-
-st.write("")
-
-# ---------------------------------------
 # Quick Actions
 # ---------------------------------------
 
@@ -79,15 +59,15 @@ st.subheader("🚀 Quick Actions")
 q1, q2, q3 = st.columns(3)
 
 with q1:
-    if st.button("📄 Upload Report", use_container_width=True):
+    if st.button("📄 Upload Report", width="stretch"):
         st.switch_page("pages/2_Upload_Report.py")
 
 with q2:
-    if st.button("📈 Analytics", use_container_width=True):
+    if st.button("📈 Analytics", width="stretch"):
         st.switch_page("pages/3_Analytics.py")
 
 with q3:
-    if st.button("📜 Report History", use_container_width=True):
+    if st.button("📜 Report History", width="stretch"):
         st.switch_page("pages/4_Report_History.py")
 
 st.write("")

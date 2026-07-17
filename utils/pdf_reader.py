@@ -20,17 +20,23 @@ def read_pdf(file_path):
         file_path (str): Path to the uploaded PDF.
 
     Returns:
-        str: Extracted text from all pages.
+        str | None:
+            Extracted text if successful,
+            None if PDF cannot be read.
     """
 
     extracted_text = ""
 
     # -------------------------------------------------
-    # Try using pdfplumber (Best for medical reports)
+    # Primary Method - pdfplumber
     # -------------------------------------------------
 
     try:
+
         with pdfplumber.open(file_path) as pdf:
+
+            if len(pdf.pages) == 0:
+                return None
 
             for page in pdf.pages:
 
@@ -39,19 +45,25 @@ def read_pdf(file_path):
                 if text:
                     extracted_text += text + "\n"
 
-        return extracted_text.strip()
+        if extracted_text.strip():
+            return extracted_text.strip()
 
     except Exception as e:
 
-        print("pdfplumber failed:", e)
+        print(f"[PDF Reader] pdfplumber failed: {e}")
 
     # -------------------------------------------------
-    # Fallback using PyPDF2
+    # Fallback Method - PyPDF2
     # -------------------------------------------------
+
+    extracted_text = ""
 
     try:
 
         reader = PdfReader(file_path)
+
+        if len(reader.pages) == 0:
+            return None
 
         for page in reader.pages:
 
@@ -60,10 +72,15 @@ def read_pdf(file_path):
             if text:
                 extracted_text += text + "\n"
 
-        return extracted_text.strip()
+        if extracted_text.strip():
+            return extracted_text.strip()
 
     except Exception as e:
 
-        print("PyPDF2 failed:", e)
+        print(f"[PDF Reader] PyPDF2 failed: {e}")
 
-        return ""
+    # -------------------------------------------------
+    # Failed to read PDF
+    # -------------------------------------------------
+
+    return None

@@ -1,348 +1,229 @@
 import streamlit as st
+import os
+import json
 
-# -------------------------------------------------
+# --------------------------------------------------
 # PAGE CONFIG
-# -------------------------------------------------
-import streamlit as st
+# --------------------------------------------------
 
 st.set_page_config(
     page_title="Medical Report Analyzer",
-    page_icon="assets/logo.png",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    page_icon="🩺",
+    layout="wide"
 )
 
-# -------------------------------------------------
-# CUSTOM CSS
-# -------------------------------------------------
+REPORT_FOLDER = "reports"
+LATEST_REPORT = os.path.join(REPORT_FOLDER, "latest_report.json")
+
+# --------------------------------------------------
+# LOAD DATA
+# --------------------------------------------------
+
+report_count = 0
+parameter_count = 0
+abnormal_count = 0
+health_score = "--"
+patient_name = "No Report"
+
+if os.path.exists(REPORT_FOLDER):
+    report_count = len([
+        f for f in os.listdir(REPORT_FOLDER)
+        if f.endswith(".json") and f != "latest_report.json"
+    ])
+
+if os.path.exists(LATEST_REPORT):
+
+    with open(LATEST_REPORT, "r") as file:
+        data = json.load(file)
+
+    summary = data["summary"]
+    health_results = data["health_results"]
+
+    patient_name = summary["Patient Name"]
+    parameter_count = len(health_results)
+    abnormal_count = summary["Abnormal Parameters"]
+    health_score = summary["Health Score"]
+
+# --------------------------------------------------
+# HERO SECTION
+# --------------------------------------------------
 
 st.markdown("""
-<style>
-
-.main{
-    background-color:#F6F9FC;
-}
-
-.block-container{
-    padding-top:2rem;
-    padding-bottom:2rem;
-    padding-left:2rem;
-    padding-right:2rem;
-}
-
-/* Hero */
-
-.hero{
+<div style="
 background:linear-gradient(90deg,#2563EB,#4F46E5);
-padding:40px;
-border-radius:20px;
+padding:35px;
+border-radius:18px;
 color:white;
 margin-bottom:25px;
-}
+">
 
-.hero h1{
-font-size:48px;
-font-weight:bold;
-margin-bottom:10px;
-}
+<h1 style="margin:0;">
+🩺 Medical Report Analyzer
+</h1>
 
-.hero p{
-font-size:20px;
-}
-
-/* Cards */
-
-.card{
-
-background:white;
-padding:25px;
-
-border-radius:18px;
-
-box-shadow:0px 8px 18px rgba(0,0,0,0.08);
-
-text-align:center;
-
-transition:0.3s;
-
-height:230px;
-
-}
-
-.card:hover{
-
-transform:translateY(-8px);
-
-box-shadow:0px 15px 25px rgba(0,0,0,0.15);
-
-}
-
-/* Statistics */
-
-.stat{
-
-background:white;
-
-padding:20px;
-
-border-radius:18px;
-
-text-align:center;
-
-box-shadow:0px 4px 12px rgba(0,0,0,0.08);
-
-}
-
-/* About */
-
-.about{
-
-background:white;
-
-padding:25px;
-
-border-radius:18px;
-
-box-shadow:0px 5px 15px rgba(0,0,0,0.08);
-
-}
-
-/* Footer */
-
-.footer{
-
-text-align:center;
-
-color:gray;
-
-padding:30px;
-
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# -------------------------------------------------
-# SIDEBAR
-# -------------------------------------------------
-
-with st.sidebar:
-
-    st.image("assets/logo.png", width=120)
-
-    st.title("Medical Report Analyzer")
-    st.caption("AI Powered Healthcare")
-    st.divider()
-
-    st.success("🟢 System Ready")
-
-    st.write("Upload your report from the **Upload Report** page.")
-
-    st.divider()
-
-    st.caption("Version 1.0")
-
-    st.caption("Developed by")
-
-    st.markdown("**Shravani Mahadik**")
-
-# -------------------------------------------------
-# HERO
-# -------------------------------------------------
-
-st.markdown("""
-
-<div class="hero">
-
-<h1>🩺 Medical Report Analyzer</h1>
-
-<p>
-
+<p style="font-size:22px;margin-top:15px;">
 Analyze Blood Reports, CBC Reports and Lab Reports using Artificial Intelligence.
-
 </p>
 
 </div>
-
 """, unsafe_allow_html=True)
 
-# -------------------------------------------------
-# STATISTICS
-# -------------------------------------------------
+# --------------------------------------------------
+# LIVE METRICS
+# --------------------------------------------------
 
-c1,c2,c3,c4=st.columns(4)
+c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-    st.markdown("""
-<div class="stat">
-
-<h3>📂 Reports</h3>
-
-<h1>0</h1>
-
-</div>
-""",unsafe_allow_html=True)
+    st.metric("📂 Reports", report_count)
 
 with c2:
-    st.markdown("""
-<div class="stat">
-
-<h3>🧪 Parameters</h3>
-
-<h1>0</h1>
-
-</div>
-""",unsafe_allow_html=True)
+    st.metric("🧪 Parameters", parameter_count)
 
 with c3:
-    st.markdown("""
-<div class="stat">
-
-<h3>⚠ Alerts</h3>
-
-<h1>0</h1>
-
-</div>
-""",unsafe_allow_html=True)
+    st.metric("⚠ Alerts", abnormal_count)
 
 with c4:
-    st.markdown("""
-<div class="stat">
-
-<h3>💚 Health Score</h3>
-
-<h1>--</h1>
-
-</div>
-""",unsafe_allow_html=True)
+    st.metric("💚 Health Score", health_score)
 
 st.write("")
 
-# -------------------------------------------------
-# FEATURES
-# -------------------------------------------------
+# --------------------------------------------------
+# FEATURE CARDS
+# --------------------------------------------------
 
-col1,col2,col3=st.columns(3)
+f1, f2, f3 = st.columns(3)
 
-with col1:
+card_style = """
+background:#EEF5FF;
+padding:25px;
+border-radius:15px;
+height:200px;
+border:1px solid #D6E6FF;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+"""
 
-    st.markdown("""
+with f1:
 
-<div class="card">
+    st.markdown(f"""
+    <div style="{card_style}">
+        <h1>📄</h1>
+        <h2>Upload Reports</h2>
+        <p>Upload PDF, PNG or JPG medical reports.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-<h1>📄</h1>
+with f2:
 
-<h2>Upload Reports</h2>
+    st.markdown(f"""
+    <div style="{card_style}">
+        <h1>🤖</h1>
+        <h2>AI Analysis</h2>
+        <p>Automatically detect abnormal medical values.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-<p>
+with f3:
 
-Upload PDF, PNG or JPG medical reports.
+    st.markdown(f"""
+    <div style="{card_style}">
+        <h1>📊</h1>
+        <h2>Health Summary</h2>
+        <p>Generate a patient-friendly health summary.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-</p>
+st.divider()
 
-</div>
-
-""",unsafe_allow_html=True)
-
-with col2:
-
-    st.markdown("""
-
-<div class="card">
-
-<h1>🤖</h1>
-
-<h2>AI Analysis</h2>
-
-<p>
-
-Automatically detect abnormal medical values.
-
-</p>
-
-</div>
-
-""",unsafe_allow_html=True)
-
-with col3:
-
-    st.markdown("""
-
-<div class="card">
-
-<h1>📈</h1>
-
-<h2>Health Summary</h2>
-
-<p>
-
-Generate a simple patient-friendly report.
-
-</p>
-
-</div>
-
-""",unsafe_allow_html=True)
-
-st.write("")
-
-# -------------------------------------------------
+# --------------------------------------------------
 # QUICK ACTIONS
-# -------------------------------------------------
+# --------------------------------------------------
 
 st.subheader("🚀 Quick Actions")
 
-a,b,c=st.columns(3)
+q1, q2, q3 = st.columns(3)
 
-with a:
-    st.button("📄 Upload Report",use_container_width=True)
+with q1:
+    if st.button("📄 Upload Report", width="stretch"):
+        st.switch_page("pages/2_Upload_Report.py")
 
-with b:
-    st.button("📊 View Analytics",use_container_width=True)
+with q2:
+    if st.button("📈 View Analytics", width="stretch"):
+        st.switch_page("pages/3_Analytics.py")
 
-with c:
-    st.button("📜 Report History",use_container_width=True)
+with q3:
+    if st.button("📜 Report History", width="stretch"):
+        st.switch_page("pages/4_Report_History.py")
 
-st.write("")
+st.divider()
 
-# -------------------------------------------------
-# ABOUT
-# -------------------------------------------------
+# --------------------------------------------------
+# LATEST REPORT
+# --------------------------------------------------
 
-st.markdown("""
-<div class="about">
+st.subheader("📋 Latest Report")
 
-<h2>📘 About the Project</h2>
+if os.path.exists(LATEST_REPORT):
 
-<p>
+    left, right = st.columns([2, 1])
 
-Medical Report Analyzer is an AI-powered healthcare assistant that extracts
-medical parameters from blood reports, detects abnormal values, compares them
-with reference ranges and generates an easy-to-understand health summary.
+    with left:
 
-</p>
+        st.success(f"👤 Patient: {patient_name}")
 
-</div>
+        st.write(f"**Health Score:** {health_score}/100")
 
-""",unsafe_allow_html=True)
+        st.write(f"**Abnormal Parameters:** {abnormal_count}")
 
-st.write("")
+    with right:
 
+        st.progress(float(health_score) / 100)
 
-# -------------------------------------------------
+else:
+
+    st.info("No reports analyzed yet.")
+
+st.divider()
+
+# --------------------------------------------------
+# RECENT ACTIVITY
+# --------------------------------------------------
+
+st.subheader("📁 Recent Activity")
+
+if os.path.exists(LATEST_REPORT):
+
+    st.success(f"Latest report analyzed for **{patient_name}**")
+
+else:
+
+    st.info("No recent activity.")
+
+st.divider()
+
+# --------------------------------------------------
+# SYSTEM STATUS
+# --------------------------------------------------
+
+st.subheader("🖥 System Status")
+
+if (
+    os.path.exists("uploads")
+    and os.path.exists("reports")
+):
+    st.success("🟢 System Ready")
+else:
+    st.error("🔴 System Not Ready")
+
+st.divider()
+
+# --------------------------------------------------
 # FOOTER
-# -------------------------------------------------
+# --------------------------------------------------
 
-st.markdown("""
-
-<div class="footer">
-
-Medical Report Analyzer • AI/ML Internship Project
-
-<br>
-
-© 2026 Shravani Mahadik
-
-</div>
-
-""",unsafe_allow_html=True)
+st.caption("🏥 Medical Report Analyzer")
+st.caption("Developed by Shravani Mahadik")
