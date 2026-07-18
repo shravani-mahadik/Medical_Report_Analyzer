@@ -108,7 +108,7 @@ fig.update_layout(
     margin=dict(l=40, r=40, t=50, b=40)
 )
 
-st.plotly_chart(fig,width="stretch")
+st.plotly_chart(fig,use_container_width=True)
 
 # ----------------------------------------
 # PARAMETER TABLE
@@ -134,7 +134,7 @@ df = pd.DataFrame(table)
 
 st.dataframe(
     df,
-    width="stretch",
+    use_container_width=True,
     hide_index=True
 )
 

@@ -59,15 +59,15 @@ st.subheader("🚀 Quick Actions")
 q1, q2, q3 = st.columns(3)
 
 with q1:
-    if st.button("📄 Upload Report", width="stretch"):
+    if st.button("📄 Upload Report", use_container_width=True):
         st.switch_page("pages/2_Upload_Report.py")
 
 with q2:
-    if st.button("📈 Analytics", width="stretch"):
+    if st.button("📈 Analytics", use_container_width=True):
         st.switch_page("pages/3_Analytics.py")
 
 with q3:
-    if st.button("📜 Report History", width="stretch"):
+    if st.button("📜 Report History", use_container_width=True):
         st.switch_page("pages/4_Report_History.py")
 
 st.write("")

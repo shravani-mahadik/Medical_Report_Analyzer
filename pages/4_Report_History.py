@@ -99,7 +99,7 @@ st.subheader("📋 Previous Reports")
 
 st.dataframe(
     history_df.drop(columns=["File"]),
-    width="stretch",
+    use_container_width=True,
     hide_index=True
 )
 
@@ -271,7 +271,7 @@ df = pd.DataFrame(table)
 
 st.dataframe(
     df,
-    width="stretch",
+    use_container_width=True,
     hide_index=True
 )
 

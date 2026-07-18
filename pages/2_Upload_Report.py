@@ -106,7 +106,7 @@ if uploaded_file is not None:
         st.image(
             image,
             caption="Uploaded Medical Report",
-            width="stretch"
+            use_container_width=True
         )
 
         extracted_text = read_image(save_path)
@@ -247,7 +247,7 @@ if uploaded_file is not None:
 
     st.dataframe(
         df,
-        width="stretch",
+        use_container_width=True,
         hide_index=True
     )
 

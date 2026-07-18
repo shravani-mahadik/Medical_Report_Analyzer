@@ -260,7 +260,7 @@ history_df = pd.DataFrame(history)
 
 st.dataframe(
     history_df,
-    width="stretch",
+    use_container_width=True,
     hide_index=True
 )
 
@@ -439,7 +439,7 @@ else:
 
     st.dataframe(
         trend_df,
-        width="stretch",
+        use_container_width=True,
         hide_index=True
     )
 
